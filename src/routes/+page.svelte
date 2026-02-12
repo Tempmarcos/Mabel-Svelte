@@ -1,6 +1,7 @@
 <script lang="ts">
     import { login } from "$lib/utils/login";
-
+    import icon from '$lib/assets/icon.png'
+    import Image from "$lib/components/Image.svelte";
     const handleSubmit = (event : any) => {
     event.preventDefault();
 
@@ -13,10 +14,16 @@
     }
   };
 </script>
+
+<svelte:head>
+  <title>Gestão Mabel - Login</title>
+  <meta name="description" content="Svelte demo app" />
+</svelte:head>
+
 <main>
     <img src="./icon.png" alt=""/>
     <div class="form">
-        <h1>Admex</h1>
+        <Image src={icon} alt="Logo da Mabel" width={300} height={200}></Image>
         <form on:submit={handleSubmit}>
             <input type="email" name="email" id="email" required placeholder="" />
             <label for="email">E-mail</label>
