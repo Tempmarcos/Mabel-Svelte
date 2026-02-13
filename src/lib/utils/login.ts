@@ -36,8 +36,9 @@ export const usuarioLogado = localStorageStore<{
         },
         body: data,
       });
-      if (!response.ok) {
-        throw new Error("Erro na requisição: " + response.status);
+       if (!response.ok) {
+          const errorData = await response.json().catch(() => null)
+          throw new Error(errorData?.error.message || `Erro ${response.status}: ${response.statusText}`)
       }
       const dados = await response.json();
       const user = dados.loginResponse;
@@ -56,5 +57,6 @@ export const usuarioLogado = localStorageStore<{
       await goto("/inicio");
     } catch (error) {
       console.error("Erro ao buscar dados: ", error);
+      throw error;
     }
   }

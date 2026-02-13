@@ -5,6 +5,7 @@
   export let alt: string = "";
   export let width: number | undefined;
   export let height: number | undefined;
+  export let draggable: boolean = true;
 
   let loaded = false;
   let img: HTMLImageElement;
@@ -28,6 +29,7 @@
     alt={alt}
     width={width}
     height={height}
+    draggable={draggable}
     loading="lazy"
     on:load={() => (loaded = true)}
     class:loaded={loaded}

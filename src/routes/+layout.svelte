@@ -20,7 +20,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-	margin: 0
+	  margin: 0;
   }
 
   main {
@@ -28,7 +28,10 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    background-color: #d9d9d9;
+    background: #00b006;
+    background: linear-gradient(329deg,rgba(0, 176, 6, 1) 0%, rgba(255, 229, 0, 1) 100%);
+    justify-content: center;
+    align-items: center;
   }
 </style>
 
