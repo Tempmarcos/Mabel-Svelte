@@ -1,7 +1,9 @@
 # Dependencies
+node_modules
 node_modules/
 
 # SvelteKit
+.svelte-kit
 .svelte-kit/
 
 # Build
