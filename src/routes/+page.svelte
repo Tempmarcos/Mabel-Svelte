@@ -7,15 +7,22 @@
     const email = writable<string>('');
     const password = writable<string>('');
     const erro = writable<string>('');
+    const isSubmitting = writable<boolean>(false);
 
     async function handleSubmit(){
+        if ($isSubmitting) return;
         if (typeof $email === "string" && typeof $password === "string") {
-            try{
-                login($email, $password);
-            }catch (err){
-                console.log(err)
-                $erro= 'Erro ao fazer login'
-            }
+          $isSubmitting= true;
+          try{
+              await login($email, $password);
+              $isSubmitting= false;
+          }catch (err){
+              console.log(err)
+              $erro= 'Erro ao fazer login'
+              $isSubmitting= false;
+          }finally{
+            $isSubmitting = false;
+          }
         }
     };
 </script>
@@ -44,7 +51,7 @@
             {#if $erro}
                 <p>{$erro}</p>
             {/if}
-            <button type="submit">Enviar</button>
+            <button disabled={$isSubmitting} type="submit">Enviar</button>
         </form>
     </div>
 </main>
@@ -117,6 +124,7 @@
   }
 
   form button {
+    color: black;
     padding: 7px;
     padding-inline: 55px;
     border: none;
@@ -131,6 +139,12 @@
     color: white;
     transform: scale(1.1);
     cursor: pointer;
+  }
+  form button:disabled {
+    filter:grayscale(0.9);
+    color: white;
+    cursor: wait;
+    transform: none;
   }
   form p {
     color: red;
