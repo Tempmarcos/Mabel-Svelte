@@ -7,7 +7,7 @@
   import { get } from "svelte/store";
   import { jwtDecode } from "jwt-decode";
 
-  onMount(() => {
+  /*onMount(() => {
     const storedUser = get(usuarioLogado);
     const storedToken = get(tokenLogin);
 
