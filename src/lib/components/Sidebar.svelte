@@ -180,7 +180,7 @@
     position: fixed;
     top: 1rem;
     left: 1rem;
-    z-index: 1001;
+    z-index: 2;
     border: none;
     border-radius: 8px;
     padding: 0.75rem;
@@ -218,7 +218,8 @@
     left: 0;
     width: var(--sidebar-width);
     height: 100vh;
-    background: var(--sidebar-bg, #363636);
+    background: #00b006;
+    background: linear-gradient(329deg,rgba(0, 176, 6, 1) 0%, rgba(255, 229, 0, 1) 100%);
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
     transform: translateX(-100%);
     transition: transform 0.3s ease;

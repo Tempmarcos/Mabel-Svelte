@@ -35,8 +35,8 @@
     }
 </script>
 <div class="container">
-    <div title={descricao} class="card" style="border: '3px solid', borderColor: {$cor}">
-        <h1 style="background-color: {$cor}">●</h1>
+    <div title={descricao} class="card" style="border: 3px solid {$cor}">
+        <h1 style="color: {$cor}">●</h1>
         <h2>{data}</h2>
         {textoValor(valor!)}
         {textoDoAlmoco(almoco!)}

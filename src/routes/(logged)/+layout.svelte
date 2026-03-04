@@ -57,12 +57,4 @@
       margin-left: 280px; /* largura do sidebar */
     }
   }
-
-  /* No mobile, o conteúdo ocupa toda a largura */
-  @media (max-width: 767px) {
-    .main-content {
-      margin-left: 0;
-      padding: 1rem;
-    }
-  }
 </style>

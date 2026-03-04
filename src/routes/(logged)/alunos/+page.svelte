@@ -88,6 +88,7 @@ onMount(async() => {
     $loadingAlunos = true;
     $loadingTurmas = true;
     $alunos = await getAlunos();
+    $alunosFiltro = $alunos;
     $loadingAlunos = false
     $turmas = await getTurmas();
     $loadingTurmas = false
@@ -107,11 +108,15 @@ onMount(async() => {
   }
 
   function handleDesativados(){
-    handleGetDesativados();
+    if($desativados.length === 0){
+      handleGetDesativados();
+    }
+    $alunosFiltro = $desativados
     $mostrarAtivo = false;
   }
 
   function handleAtivos(){
+    $alunosFiltro = $alunos;
     $mostrarAtivo = true;
   }
 
@@ -199,16 +204,6 @@ onMount(async() => {
     $diariasAtuais = [];
     $atrasosAtuais = []
     $ajustesAtuais = []
-  }
-
-  function handleLegendas() {
-    if(displayLegenda == 'block'){
-      displayLegenda = 'none';
-      textoLegenda = 'Legendas ↓'
-    } else {
-      displayLegenda= 'block'
-      textoLegenda = 'Legendas ↑'
-    }
   }
 
   //Função para a filtragem do turno e da turma
@@ -322,16 +317,7 @@ onMount(async() => {
       </DropdownButton>
       <input type="text" placeholder="Pesquisar..." id="searchBar" onchange={()=> SearchFilter} />
     </Header>
-    <div class="legendas">
-      <a onclick={handleLegendas} style="display: block; cursor: pointer; width: 150px">
-        <h2>{textoLegenda}</h2>
-      </a>
-      <div style="display: {displayLegenda}">
-          <h3>Manhã:</h3> <input type="color" id="inputColorManha" value='#00ffff' />
-          <h3>Tarde:</h3> <input type="color" id="inputColorTarde" value='#ffa500' />
-      </div>
-      <h2>Alunos: {$alunosFiltro.length}</h2>
-    </div>
+    <h2>Alunos: {$alunosFiltro.length}</h2>
     <div class="listaAlunos">
     {#if $loadingAlunos}
       <p>Carregando...</p>
@@ -348,107 +334,169 @@ onMount(async() => {
       </a>
     {/each}
     </div>
-    <Modal showModal={$showModal} onClose={handleFecharModal}>
+    <Modal showModal={$showModal} onClose={handleFecharModal} maxWidth="800px" maxHeight="90vh">
     {#if $alunoAtual}
-    <div class="modal">
-        <a onclick={irParaEdicao} class="linkEditar">Ver/Editar informações do aluno</a>
+    <div class="aluno-modal-content">
+      <!-- Header -->
+      <header class="modal-header">
         <h1 class="nome">{$alunoAtual.nome}</h1>
-        <div class="div">
-            <h1>Diárias</h1>
-            <button onclick={() => !displayCriarDiaria}>+</button>
-            {#if displayCriarDiaria}
-              <div>
-                  <form onsubmit={() => handleCreateDiaria()}>
-                      <div>
-                      <label for="turno">Turno:</label>
-                      <select id="turno" bind:value={$novaDiaria.turno}>
-                          <option value="MANHA">Manhã</option>
-                          <option value="TARDE">Tarde</option>
-                      </select>
-                      </div>
-                      <div>
-                      <label for="almoco">Almoço:</label>
-                      <input type="checkbox" id="almoco" bind:checked={$novaDiaria.almoco}/>
-                      </div>
-                      <div>
-                      <label for="data">Data:</label>
-                      <input type="date" id="data" bind:value={$novaDiaria.data}/>
-                      </div>
-                      <button type="submit" disabled={$creatingDiaria}>Registrar diária</button>
-                  </form>
-              </div>
-            {/if}
+        <a onclick={irParaEdicao} class="link-editar" href="#">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          Ver/Editar informações
+        </a>
+      </header>
+
+      <!-- Seção Diárias -->
+      <section class="secao">
+        <div class="secao-header">
+          <h2>Diárias</h2>
+          <button class="btn-add" onclick={()=> $displayCriarDiaria = !$displayCriarDiaria} aria-label="Adicionar diária">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
         </div>
-        <div class="div">
-            {#if $diariasAtuais.length === 0}
-              <h4>{$alunoAtual.nome} não possui diárias</h4>
-            {/if}
+        
+        {#if displayCriarDiaria}
+          <form class="form-inline" onsubmit={handleCreateDiaria}>
+            <div class="form-group">
+              <label for="turno">Turno:</label>
+              <select id="turno" bind:value={$novaDiaria.turno}>
+                <option value="MANHA">Manhã</option>
+                <option value="TARDE">Tarde</option>
+              </select>
+            </div>
+            
+            <label class="checkbox-label">
+              <input type="checkbox" bind:checked={$novaDiaria.almoco}/>
+              <span>Almoço</span>
+            </label>
+            
+            <div class="form-group">
+              <label for="data-diaria">Data:</label>
+              <input type="date" id="data-diaria" bind:value={$novaDiaria.data}/>
+            </div>
+            
+            <button type="submit" class="btn-primary" disabled={$creatingDiaria}>
+              {$creatingDiaria ? 'Registrando...' : 'Registrar'}
+            </button>
+          </form>
+        {/if}
+
+        <div class="lista-cards">
+          {#if $diariasAtuais.length === 0}
+            <p class="empty-state">Nenhuma diária registrada</p>
+          {:else}
             {#each $diariasAtuais as diaria}
-              <DiariaCard almoco={diaria.almoco} turno={diaria.turno} data={diaria.data} onClick={() => handleDeleteDiaria(diaria.id, diaria.alunoId)}/>
+              <DiariaCard 
+                almoco={diaria.almoco} 
+                turno={diaria.turno} 
+                data={diaria.data} 
+                onClick={() => handleDeleteDiaria(diaria.id, diaria.alunoId)}
+              />
             {/each}
+          {/if}
         </div>
-        <div class="div">
-            <h1>Atrasos</h1>
-            <button onclick={() => !displayCriarAtraso}>+</button>
-            {#if displayCriarAtraso}
-              <div>
-                <form onsubmit={() => handleCreateAtraso()}>
-                    <div>
-                    <label for="data">Data:</label>
-                    <input type="date" id="data" bind:value={$novoAtraso.data}/>
-                    </div>
-                    <button type="submit" disabled={$creatingAtraso}>Registrar atraso</button>
-                </form>
-              </div>
-            {/if}
+      </section>
+
+      <!-- Seção Atrasos -->
+      <section class="secao">
+        <div class="secao-header">
+          <h2>Atrasos</h2>
+          <button class="btn-add" onclick={()=> $displayCriarAtraso = !$displayCriarAtraso} aria-label="Adicionar atraso">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
         </div>
-        <div class="div">
-            {#if $atrasosAtuais.length === 0}
-              <h4>{$alunoAtual.nome} não possui atrasos</h4>
-            {/if}
+        
+        {#if displayCriarAtraso}
+          <form class="form-inline" onsubmit={handleCreateAtraso}>
+            <div class="form-group">
+              <label for="data-atraso">Data:</label>
+              <input type="date" id="data-atraso" bind:value={$novoAtraso.data}/>
+            </div>
+            <button type="submit" class="btn-primary" disabled={$creatingAtraso}>
+              {$creatingAtraso ? 'Registrando...' : 'Registrar'}
+            </button>
+          </form>
+        {/if}
+
+        <div class="lista-cards">
+          {#if $atrasosAtuais.length === 0}
+            <p class="empty-state">Nenhum atraso registrado</p>
+          {:else}
             {#each $atrasosAtuais as atraso}
-              <DiariaCard data={atraso.data} onClick={() => handleDeleteAtraso(atraso.id, atraso.alunoId)}/>
+              <DiariaCard 
+                data={atraso.data} 
+                onClick={() => handleDeleteAtraso(atraso.id, atraso.alunoId)}
+              />
             {/each}
+          {/if}
         </div>
-        <div class="div">
-            <h1>Ajuste</h1>
-            <button onclick={() => !displayCriarAjuste}>+</button>
-            {#if displayCriarAjuste}
-              <div>
-                  <form onsubmit={() => handleCreateAjuste()}>
-                      <div>
-                      <label for="valor">Valor:</label>
-                      <input type="number" id="valor" bind:value={$novoAjuste.valor}/>
-                      </div>
-                      <div>
-                      <label for="descricao">Descrição:</label>
-                      <input type="text" id="descricao" bind:value={$novoAjuste.descricao}/>
-                      </div>
-                      <div>
-                      <label for="data">Data:</label>
-                      <input type="date" id="data" bind:value={$novoAjuste.data}/>
-                      </div>
-                      <button type="submit" disabled={$creatingAjuste}>Registrar ajuste</button>
-                  </form>
+      </section>
+
+      <!-- Seção Ajustes -->
+      <section class="secao">
+        <div class="secao-header">
+          <h2>Ajustes</h2>
+          <button class="btn-add" onclick={()=> $displayCriarAjuste = !$displayCriarAjuste} aria-label="Adicionar ajuste">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+        
+        {#if displayCriarAjuste}
+          <form class="form-stack" onsubmit={handleCreateAjuste}>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="valor">Valor (R$):</label>
+                <input type="number" id="valor" bind:value={$novoAjuste.valor} step="0.01"/>
               </div>
-            {/if}
-        </div>
-        <div class="div">
-            {#if $ajustesAtuais.length === 0}
-              <h4>{$alunoAtual.nome} não possui ajustes</h4>
-            {/if}
+              <div class="form-group">
+                <label for="data-ajuste">Data:</label>
+                <input type="date" id="data-ajuste" bind:value={$novoAjuste.data}/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="descricao">Descrição:</label>
+              <input type="text" id="descricao" bind:value={$novoAjuste.descricao} placeholder="Motivo do ajuste..."/>
+            </div>
+            <button type="submit" class="btn-primary" disabled={$creatingAjuste}>
+              {$creatingAjuste ? 'Registrando...' : 'Registrar Ajuste'}
+            </button>
+          </form>
+        {/if}
+
+        <div class="lista-cards">
+          {#if $ajustesAtuais.length === 0}
+            <p class="empty-state">Nenhum ajuste registrado</p>
+          {:else}
             {#each $ajustesAtuais as ajuste}
-              <DiariaCard data={ajuste.data} onClick={() => handleDeleteAjuste(ajuste.id, ajuste.alunoId)}/>
+              <DiariaCard 
+                data={ajuste.data} 
+                onClick={() => handleDeleteAjuste(ajuste.id, ajuste.alunoId)}
+              />
             {/each}
+          {/if}
         </div>
+      </section>
     </div>
-    {/if}
+  {/if}
     </Modal>
     <ButtonAdicionar onClick={()=> goto('/alunos/criar')} title='Adicionar aluno'/>
 </main>
 <style>
 .main {
   min-height: 100vh;
+  background-color: white;
 }
 
 .listaAlunos {
@@ -461,37 +509,222 @@ onMount(async() => {
   overflow-x: hidden;
 }
 
-.modal {
-    width: 90vw;
-    height: 80vh;
+.linkAlunos {
+  cursor: pointer;
+  margin: 8px 0 0 8px
+}
+
+/* Container principal do conteúdo */
+  .aluno-modal-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  /* Header do modal */
+  .modal-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .nome {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+  }
+
+  .link-editar {
+    display: inline-flex;
     align-items: center;
-}
+    gap: 0.5rem;
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    width: fit-content;
+    transition: color 0.2s;
+  }
 
-.modal a, .modal h1{
-    height: min-content;
-}
+  .link-editar:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
 
-.modal .linkEditar {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-}
+  /* Seções */
+  .secao {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 1rem;
+  }
 
-.modal .nome {
-  position: absolute;
-  top: 5px;
-}
+  .secao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
 
-.modal .div {
-  display: flex;
-  flex-direction: row;
-  overflow-x: auto;
-  align-items: center;
-  margin: 10px
-}
+  .secao h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+  }
+
+  /* Botões */
+  .btn-add {
+    background: #2563eb;
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .btn-add:hover {
+    background: #1d4ed8;
+    transform: scale(1.05);
+  }
+
+  .btn-primary {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #059669;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Formulários */
+  .form-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: end;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .form-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    min-width: 120px;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #2563eb;
+    ring: 2px solid #bfdbfe;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+
+  .checkbox-label:hover {
+    background: #f3f4f6;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #2563eb;
+  }
+
+  /* Lista de cards */
+  .lista-cards {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    min-height: 80px;
+  }
+
+  .empty-state {
+    color: #9ca3af;
+    font-style: italic;
+    text-align: center;
+    width: 100%;
+    padding: 1rem;
+  }
+
+  /* Scrollbar horizontal */
+  .lista-cards::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .lista-cards::-webkit-scrollbar-track {
+    background: #e5e7eb;
+    border-radius: 3px;
+  }
+
+  .lista-cards::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 3px;
+  }
 
 form button:disabled{
   animation: pulse-bg 0.7s infinite alternate;
@@ -506,9 +739,19 @@ form button:disabled{
   }
 }
 
-@media(max-width: 700px){
-    .modal .nome {
-      top: 15px;
+@media (max-width: 640px) {
+    .form-inline {
+      flex-direction: column;
+      align-items: stretch;
     }
-}
+
+    .form-row {
+      flex-direction: column;
+    }
+
+    .lista-cards {
+      flex-direction: column;
+      overflow-x: visible;
+    }
+  }
 </style>
